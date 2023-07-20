@@ -1,0 +1,184 @@
+---
+title: "SVM ML"
+author: "Vanita Khunt(2268227)"
+date: "2023-03-24"
+output: html_document
+---
+
+#libraries
+```{r}
+#install.packages("kernlab")
+library(ggplot2)
+library(lattice)
+library(caret)
+library(kernlab)
+```
+
+#load data
+```{r}
+# Read the CSV file "used_car_new.csv" into a data frame called SVM_data
+# Set stringsAsFactors to TRUE, so that any character columns are treated as factors (categorical variables)
+SVM_data <- read.csv("used_car_new.csv", stringsAsFactors = TRUE)
+
+# Remove the first column from the data frame by selecting all rows and all columns except the first one
+# The first column is an index/ID column that is not needed for the analysis
+SVM_data <- SVM_data[,-1]
+
+```
+
+
+#Model Training
+```{r}
+set.seed(150)
+# Calculate the number of rows in the SVM_data data frame
+n_rows <- nrow(SVM_data)
+
+# Generate a random sample of 70% of the row indices from the data frame
+idx <- sample(n_rows, n_rows*0.7)
+
+# Create a training data set by selecting rows with indices from the random sample (idx)
+SVM_train <- SVM_data[idx,]
+
+# Create a testing data set by selecting rows with indices not in the random sample (idx)
+SVM_test <- SVM_data[-idx,]
+
+# Define the formula for the SVM model, with Price as the target variable and other variables as predictors
+SVM_formula <- Price~Year+Mileage+NewCity+NewState+NewMake+NewModel
+
+# Set up the training control parameters for cross-validation and grid search
+trainControl <- trainControl(method = "repeatedcv", number = 2, repeats = 2, search = "grid")
+
+# Train the SVM model using the radial basis function (RBF) kernel, cross-validation, and pre-processing (scaling and centering)
+SVM_model <- train(SVM_formula, data = SVM_train, method='svmRadial', trControl=trainControl, preProcess=c("scale", "center"))
+
+# Print the trained SVM model
+SVM_model
+
+# Make predictions on the test data set (excluding the target variable, Price)
+predictions <- predict(SVM_model, SVM_test[,-1], type = 'raw')
+
+# Calculate  performance metrics for the predictions
+rmsv <- RMSE(predictions, SVM_test$Price)
+mse <- RMSE(predictions, SVM_test$Price)^2
+mae <- MAE(predictions, SVM_test$Price)
+r2 <- R2(predictions, SVM_test$Price)
+
+# Print the performance metrics
+rmsv 
+mse 
+mae 
+r2
+
+#plotting
+
+# Create a data frame with the actual values from the test dataset and the predicted values
+results <- data.frame(Actual = SVM_test$Price, Predicted = predictions)
+
+
+# Create a scatter plot using ggplot2
+png(file = "SVM_2fold.png", width = 640, height = 480)
+ggplot(results, aes(x = Actual, y = Predicted)) +
+  geom_point(color = "blue") +
+  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+  labs(title = "Actual vs. Predicted Values",
+       x = "Actual Values",
+       y = "Predicted Values") +
+  theme_minimal()+
+ggtitle("Support Vector Machines Model(2fold)")
+dev.off()
+
+```
+```{r}
+# changing number = 3
+set.seed(199)
+# Set up the training control parameters for cross-validation and grid search
+trainControl <- trainControl(method = "repeatedcv", number = 3, repeats = 2, search = "grid")
+
+# Train the SVM model using the radial basis function (RBF) kernel, cross-validation, and pre-processing (scaling and centering)
+SVM_model <- train(SVM_formula, data = SVM_train, method='svmRadial', trControl=trainControl, preProcess=c("scale", "center"))
+
+# Print the trained SVM model
+SVM_model
+
+# Make predictions on the test data set (excluding the target variable, Price)
+predictions <- predict(SVM_model, SVM_test[,-1], type = 'raw')
+
+# Calculate  performance metrics for the predictions
+rmsv <- RMSE(predictions, SVM_test$Price)
+mse <- RMSE(predictions, SVM_test$Price)^2
+mae <- MAE(predictions, SVM_test$Price)
+r2 <- R2(predictions, SVM_test$Price)
+
+# Print the performance metrics
+rmsv 
+mse 
+mae 
+r2
+
+#plotting
+
+# Create a data frame with the actual values from the test dataset and the predicted values
+results <- data.frame(Actual = SVM_test$Price, Predicted = predictions)
+
+
+# Create a scatter plot using ggplot2
+png(file = "SVM_3fold.png", width = 640, height = 480)
+ggplot(results, aes(x = Actual, y = Predicted)) +
+  geom_point(color = "blue") +
+  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+  labs(title = "Actual vs. Predicted Values",
+       x = "Actual Values",
+       y = "Predicted Values") +
+  theme_minimal()+
+ggtitle("Support Vector Machines Model(3fold)")
+dev.off()
+
+```
+```{r}
+# changing number = 3
+set.seed(199)
+# Set up the training control parameters for cross-validation and grid search
+trainControl <- trainControl(method = "repeatedcv", number = 10, repeats = 2, search = "grid")
+
+# Train the SVM model using the radial basis function (RBF) kernel, cross-validation, and pre-processing (scaling and centering)
+SVM_model <- train(SVM_formula, data = SVM_train, method='svmRadial', trControl=trainControl, preProcess=c("scale", "center"))
+
+# Print the trained SVM model
+SVM_model
+
+# Make predictions on the test data set (excluding the target variable, Price)
+predictions <- predict(SVM_model, SVM_test[,-1], type = 'raw')
+
+# Calculate  performance metrics for the predictions
+rmsv <- RMSE(predictions, SVM_test$Price)
+mse <- RMSE(predictions, SVM_test$Price)^2
+mae <- MAE(predictions, SVM_test$Price)
+r2 <- R2(predictions, SVM_test$Price)
+
+# Print the performance metrics
+rmsv 
+mse 
+mae 
+r2
+
+#plotting
+
+# Create a data frame with the actual values from the test dataset and the predicted values
+results <- data.frame(Actual = SVM_test$Price, Predicted = predictions)
+
+
+# Create a scatter plot using ggplot2
+
+ggplot(results, aes(x = Actual, y = Predicted)) +
+  geom_point(color = "blue") +
+  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+  labs(title = "Actual vs. Predicted Values",
+       x = "Actual Values",
+       y = "Predicted Values") +
+  theme_minimal()
+
+
+```
+The Support Vector Machines (SVM) with Radial Basis Function (RBF) kernel was applied to the dataset of used cars, with scaling and centering as pre-processing. Cross-validation was utilised to calibrate the extreme parameters, such as C and sigma, with RMSE serving as the efficiency metric. Using 2-fold, 3-fold, and 10-fold cross-validation repeated twice for each phase, the results were obtained. The final model had a C value of 1 and a sigma value of 0.09451222, as well as RMSE values of 11462.77, MSE values of 131395059, MAE values of 7297.979, and R2 values of 0.2919139.
+
+The SVM-RBF model performed better than the linear regression model, as evidenced by its lower RMSE and higher R2 values. Similar results were obtained for 2-fold, 3-fold, and 10-fold cross-validation, indicating that the model's performance was consistent across all cross-validation fold sizes. The preprocessing stages of scaling and centering improved the performance of the model, allowing for accurate hyperparameter tuning.In the end least, I wouldn't recommend 10 fold because it produces a more complex result with little variation in output.
