@@ -1,0 +1,224 @@
+---
+title: "LINEAR REGRESSION ML"
+author: "Vanita Khunt"
+date: "2023-03-24"
+output: html_document
+---
+
+
+#libraries
+```{r}
+library(ggplot2)
+library(lattice)
+library(caret)
+library(mlbench)
+```
+
+
+```{r}
+#load data
+data  <- read.csv("used_car_new.csv", stringsAsFactors = TRUE)
+data <- data[,-1]
+```
+
+
+#Lm 
+```{r}
+set.seed(1997)
+#Number of obs
+n_rows <- nrow(data)
+
+#70/30 percent
+idx <- sample(n_rows, n_rows*0.7)
+
+
+#training and test dataset
+data_train <- data[idx,]
+data_test <- data[-idx,]
+#names(data)
+
+
+# formula
+lm_formula <- Price~Year + Mileage + NewCity + NewState + NewMake + NewModel
+
+
+#training algorithm using CV
+ctrl_parameters_cv <- trainControl(method = 'CV', number = 1000, savePredictions = "final")
+lm_cv <- train(lm_formula, data = data_train, method='lm', trControl=ctrl_parameters_cv, preProcess=c("scale", "center"))
+
+#training algorithm using Boot
+ctrl_parameters_boot <- trainControl(method = 'boot', number = 1000, savePredictions = "final")
+lm_boot <- train(lm_formula, data = data_train, method='lm', trControl=ctrl_parameters_boot, preProcess=c("scale", "center"))
+
+#summary
+lm_cv
+lm_boot
+
+
+#predictions
+predictions_cv <- predict(lm_cv, data_test[,-1], type = 'raw')
+predictions_boot <- predict(lm_boot, data_test[,-1], type = 'raw')
+
+#results wit City and State with CV method for linear Regression
+rmsv_wcs_CV <-RMSE(predictions_cv, data_test$Price)
+mse_wcs_CV <-RMSE(predictions_cv, data_test$Price)^2
+mae_wcs_CV <-MAE(predictions_cv, data_test$Price)
+r2_wcs_CV <-R2(predictions_cv, data_test$Price)
+
+#results wit City and State with BootStrap method for linear Regression
+rmsv_wcs_Bt <-RMSE(predictions_boot, data_test$Price)
+mse_wcs_Bt <-RMSE(predictions_boot, data_test$Price)^2
+mae_wcs_Bt <-MAE(predictions_boot, data_test$Price)
+r2_wcs_Bt <-R2(predictions_boot, data_test$Price)
+
+rmsv_wcs_CV
+mse_wcs_CV
+mae_wcs_CV
+r2_wcs_CV
+
+rmsv_wcs_Bt
+mse_wcs_Bt
+mae_wcs_Bt
+r2_wcs_Bt
+
+#plotting
+
+# create a data frame of the actual and predicted values
+results <- data.frame(actual = data_test$Price, predictions_cv, predictions_boot)
+
+# plot the predicted versus actual values using ggplot2
+png(file = "LM_Crossvalidation.png", width = 640, height = 480)
+ggplot(results, aes(x = actual, y = predictions_cv)) +
+  geom_point(color = "blue") +
+  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+  labs(title = "Actual vs. Predicted Values",
+       x = "Actual Values",
+       y = "Predicted Values") +
+  theme_minimal()+
+  ggtitle("Linear Regression Model(CV)")
+dev.off()
+
+png(file = "LM_Bootsrape.png", width = 640, height = 480)
+ggplot(results, aes(x = actual, y = predictions_boot)) +
+ geom_point(color = "blue") +
+  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+  labs(title = "Actual vs. Predicted Values",
+       x = "Actual Values",
+       y = "Predicted Values") +
+  theme_minimal()+
+  ggtitle("Linear Regression Model(Boot)")
+dev.off()
+
+#Checking variable importance
+varImp(lm_cv)
+varImp(lm_boot)
+```
+
+```{r}
+# Print the Cross-Validation and Bootstrapping results side-by-side with city and State
+cat("Cross-Validation \t\t Bootstrapping \n")
+cat("RMSE:", rmsv_wcs_CV, "\t\t\tRMSE:", rmsv_wcs_Bt, "\n")
+cat("MSE:", mse_wcs_CV, "\t\t\tMSE:", mse_wcs_Bt, "\n")
+cat("MAE:", mae_wcs_CV, "\t\t\tMAE:", mae_wcs_Bt, "\n")
+cat("R2:", r2_wcs_CV, "\t\t\tR2:", r2_wcs_Bt, "\n")
+```
+
+```{r}
+set.seed(1998)
+
+
+#Dropping City and State
+data_new <- data[,-c(4,5)]
+str(data_new)
+#Number of obs
+n_rows <- nrow(data_new)
+
+#70/30 percent
+idx <- sample(n_rows, n_rows*0.7)
+
+
+#training and test dataset
+data_train <- data_new[idx,]
+data_test <- data_new[-idx,]
+#names(data)
+
+names(data)
+# formula
+lm_formula_new <- Price~Year + Mileage + NewMake + NewModel
+
+
+#training algorithm using CV
+ctrl_parameters_cv <- trainControl(method = 'CV', number = 1000, savePredictions = "final")
+lm_cv <- train(lm_formula_new, data = data_train, method='lm', trControl=ctrl_parameters_cv, preProcess=c("scale", "center"))
+
+#training algorithm using Boot
+ctrl_parameters_boot <- trainControl(method = 'boot', number = 1000, savePredictions = "final")
+lm_boot <- train(lm_formula_new, data = data_train, method='lm', trControl=ctrl_parameters_boot,preProcess=c("scale", "center"))
+
+#summary
+lm_cv
+lm_boot
+
+#predictions
+predictions_cv <- predict(lm_cv, data_test[,-1], type = 'raw')
+predictions_boot <- predict(lm_boot, data_test[,-1], type = 'raw')
+
+#results without city and state with CV method for linear Regression 
+rmsv_wocs_CV <-RMSE(predictions_cv, data_test$Price)
+mse_wocs_CV <-RMSE(predictions_cv, data_test$Price)^2
+mae_wocs_CV <-MAE(predictions_cv, data_test$Price)
+r2_wocs_CV <-R2(predictions_cv, data_test$Price)
+
+rmsv_wocs_Bt <-RMSE(predictions_boot, data_test$Price)
+mse_wocs_Bt <-RMSE(predictions_boot, data_test$Price)^2
+mae_wocs_Bt <-MAE(predictions_boot, data_test$Price)
+r2_wocs_Bt <-R2(predictions_boot, data_test$Price)
+
+
+# Print the Cross-Validation and Bootstrapping results side-by-side without city and state (without outlier) 
+cat("Cross-Validation Results \tBootstrapping Results \n")
+cat("RMSE:", rmsv_wocs_CV, "\t\t\tRMSE:", rmsv_wocs_Bt, "\n")
+cat("MSE:", mse_wocs_CV, "\t\t\tMSE:", mse_wocs_Bt, "\n")
+cat("MAE:", mae_wocs_CV, "\t\t\tMAE:", mae_wocs_Bt, "\n")
+cat("R2:", r2_wocs_CV, "\t\t\tR2:", r2_wocs_Bt, "\n")
+
+#plotting
+
+# create a data frame of the actual and predicted values
+results <- data.frame(actual = data_test$Price, predictions_cv, predictions_boot)
+
+# plot the predicted versus actual values using ggplot2
+png(file = "LM_Crossvalidation_woCS.png", width = 640, height = 480)
+ggplot(results, aes(x = actual, y = predictions_cv)) +
+   geom_point(color = "blue") +
+  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+  labs(title = "Actual vs. Predicted Values",
+       x = "Actual Values",
+       y = "Predicted Values") +
+  theme_minimal()+
+  ggtitle("Linear Regression Model(CV)")
+
+dev.off()
+
+png(file = "LM_Boot_woCS.png", width = 640, height = 480)
+ggplot(results, aes(x = actual, y = predictions_boot)) +
+  geom_point(color = "blue") +
+  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+  labs(title = "Actual vs. Predicted Values",
+       x = "Actual Values",
+       y = "Predicted Values") +
+  theme_minimal()+
+  ggtitle("Linear Regression Model(Boot)")
+dev.off()
+
+#Checking variable importance
+varImp(lm_cv)
+varImp(lm_boot)
+```
+In this implementation of the used car dataset, we used linear regression modelling to determine the prices of used cars based on a variety of features, including year, mileage, city, state, make, and model. Using cross-validation and bootstrapping techniques, we compared the performance of our model. The initial model with all features had an RMSE of 12395.39, while the model without city and state had an RMSE of 11768.54, an average improvement.
+
+The elimination of city and state features reduced the model's complexity and noise, resulting in marginally improved performance. With an R2 value of approximately 0.25, however, the model's overall predictive power remained somewhat low. It may be necessary to conduct additional research into data and feature engineering techniques in order to enhance the performance of the model. 
+
+
+
+
