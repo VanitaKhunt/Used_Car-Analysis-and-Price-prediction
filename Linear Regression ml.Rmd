@@ -1,6 +1,6 @@
 ---
 title: "LINEAR REGRESSION ML"
-author: "Vanita Khunt"
+author: "Vanita"
 date: "2023-03-24"
 output: html_document
 ---

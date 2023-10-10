@@ -1,6 +1,6 @@
 ---
 title: "SVM ML"
-author: "Vanita Khunt(2268227)"
+author: "Vanita"
 date: "2023-03-24"
 output: html_document
 ---

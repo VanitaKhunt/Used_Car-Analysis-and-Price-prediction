@@ -1,6 +1,6 @@
 ---
 title: "EDA"
-author: "Vanita Khunt(2268227)"
+author: "Vanita"
 date: "2023-03-11"
 output: html_document
 editor_options: 
@@ -11,7 +11,7 @@ editor_options:
 ```{r}
 library(ggplot2)
 library(modeest)
-library(moments)
+library(modeest)
 ```
 
 # Loading data into R
@@ -149,7 +149,7 @@ str(used_car_reduced)
 
 ```{r}
 #Histogram of Used Car Prices
-
+png(file = "Price_histogram.png", width = 640, height = 480)
 ggplot(used_car_reduced, aes(x=Price)) + 
   geom_histogram( bins = 20, fill="#69b3a2", alpha=0.9) +
   geom_vline(aes(xintercept=mean(Price)),
@@ -157,7 +157,7 @@ ggplot(used_car_reduced, aes(x=Price)) +
   xlim(1500,379900)+
   labs(x = "Price", y = "Frequency",
        title = "Histogram of Used Car Prices")
-
+dev.off()
 ```
 
   .The histogram's right-skewed distribution confirms the conclusion drawn from summary statistics that most prices fall in the lower range and a few prices are extremely high. The right side of the distribution has a lengthy tail, suggesting the existence of outliers.
